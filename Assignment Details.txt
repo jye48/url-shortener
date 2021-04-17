@@ -17,5 +17,11 @@ Linux or Mac in a README file.
 6. Building a front-end client for this API is not part of the assignment.
 7. Deploying this API is not part of the assignment.
 
-Constraints
+Constraints and Specifications
  - Max submitted URL length of 2048 chars
+ - No constraint on shortened URL char set
+ - Shortened url should be less than 7 chars long
+ - List of short urls should contain "target url" , "short url" , "time created"
+ - Time created can be epoch time (aka unix timestamp)
+ - If the long URL in a request to create a short URL already exists, return the existing short URL
+   that corresponds to the long URL
