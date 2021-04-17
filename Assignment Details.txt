@@ -1,0 +1,21 @@
+Requirements
+These are the business rules that need to be fulfilled.
+1. User should be able to submit any URL and get a standardized, shortened URL back
+2. Navigating to a shortened URL should redirect to the appropriate target URL
+3. User should be able to retrieve a list of all existing shortened URLs in the system,
+including time since creation and target URLs
+4. API requests and responses should be JSON formatted.
+
+Considerations
+These are some guidelines for scope and technology choice.
+1. Don't worry about any user registration or authentication.
+2. Use your choice of programming language with your choice of web framework.
+3. Use a relational database; I recommend SQLite for ease of use.
+4. Please share this via a Github repository that we can clone.
+5. Please provide instructions to set up, test and run the API in a local environment on
+Linux or Mac in a README file.
+6. Building a front-end client for this API is not part of the assignment.
+7. Deploying this API is not part of the assignment.
+
+Constraints
+ - Max submitted URL length of 2048 chars
