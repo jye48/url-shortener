@@ -2,14 +2,12 @@ package co.bulletin.urlshortener.service;
 
 import co.bulletin.urlshortener.entity.ShortUrl;
 import co.bulletin.urlshortener.exception.model.UrlNotFoundException;
+import co.bulletin.urlshortener.mapper.ShortUrlMapper;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
 import co.bulletin.urlshortener.model.ShortUrlDto;
 import co.bulletin.urlshortener.repository.ShortUrlRepository;
-import co.bulletin.urlshortener.utility.TimeUtility;
-import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,38 +16,25 @@ public class UrlShortenerService {
 
   private final ShortUrlRepository shortUrlRepository;
 
-  private final ModelMapper modelMapper;
+  private final ShortUrlMapper shortUrlMapper;
 
   public ShortUrlDto createShortUrl(CreateShortUrlRequest createShortUrlRequest) {
-    String longUrl = createShortUrlRequest.getLongUrl();
+    String targetUrl = createShortUrlRequest.getTargetUrl();
 
-    Optional<ShortUrl> existingShortUrlOptional = shortUrlRepository.findByLongUrl(longUrl);
+    Optional<ShortUrl> existingShortUrlOptional = shortUrlRepository.findByTargetUrl(targetUrl);
     if (existingShortUrlOptional.isPresent()) {
       ShortUrl existingShortUrl = existingShortUrlOptional.get();
-      return createShortUrlDtoFromShortUrlEntity(existingShortUrl, Instant.now());
+      return shortUrlMapper.mapShortUrlEntityToDto(existingShortUrl);
     } else {
-      ShortUrl newShortUrl = createShortUrlEntityFromRequest(createShortUrlRequest);
+      ShortUrl newShortUrl = shortUrlMapper.mapCreateShortUrlRequestToEntity(createShortUrlRequest);
       newShortUrl = shortUrlRepository.save(newShortUrl);
-      return createShortUrlDtoFromShortUrlEntity(newShortUrl, Instant.now());
+      return shortUrlMapper.mapShortUrlEntityToDto(newShortUrl);
     }
   }
 
-  public String findByLongUrlByShortUrlId(Integer shortUrlId) {
+  public String findByTargetUrlByShortUrlId(Integer shortUrlId) {
     ShortUrl retrievedShortUrl = shortUrlRepository.findById(shortUrlId)
         .orElseThrow(() -> new UrlNotFoundException(shortUrlId));
-    return retrievedShortUrl.getLongUrl();
-  }
-
-  private ShortUrl createShortUrlEntityFromRequest(CreateShortUrlRequest createShortUrlRequest) {
-    return modelMapper.map(createShortUrlRequest, ShortUrl.class);
-  }
-
-  private ShortUrlDto createShortUrlDtoFromShortUrlEntity(ShortUrl shortUrl,
-      Instant currentInstant) {
-    ShortUrlDto shortUrlDto = modelMapper.map(shortUrl, ShortUrlDto.class);
-    long millisSinceCreation = TimeUtility
-        .getTimeElapsedMillis(shortUrl.getCreatedTimestamp(), currentInstant);
-    shortUrlDto.setMillisSinceCreation(millisSinceCreation);
-    return shortUrlDto;
+    return retrievedShortUrl.getTargetUrl();
   }
 }
