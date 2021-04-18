@@ -3,16 +3,19 @@ package co.bulletin.urlshortener.entity;
 import java.time.Instant;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "short_url")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class ShortUrl {
 
@@ -21,12 +24,12 @@ public class ShortUrl {
   @Column(name = "id")
   private Integer id;
 
-  @Column(name = "long_url", unique = true)
+  @Column(name = "target_url", unique = true)
   @NotNull
-  private String longUrl;
+  private String targetUrl;
 
   @Column(name = "created_timestamp")
-  @CreationTimestamp
+  @CreatedDate
   @NotNull
   private Instant createdTimestamp;
 }
