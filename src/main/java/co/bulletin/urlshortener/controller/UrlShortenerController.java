@@ -10,10 +10,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.net.URI;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,7 @@ public class UrlShortenerController {
 
   private final UrlShortenerService urlShortenerService;
 
-  @Operation(summary = "Create a new short URL for a given long URL")
+  @Operation(summary = "Create a new short URL for a given target URL")
   @ApiResponses(
       value = {
           @ApiResponse(
@@ -48,13 +49,6 @@ public class UrlShortenerController {
               content =
               @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = ErrorResponse.class))),
-          @ApiResponse(
-              responseCode = "404",
-              description = "Parent organization id was not found",
-              content =
-              @Content(
-                  mediaType = "application/json",
                   schema = @Schema(implementation = ErrorResponse.class)))
       })
   @PostMapping("/short-urls")
@@ -66,12 +60,13 @@ public class UrlShortenerController {
     return new ResponseEntity<>(shortUrlDto, HttpStatus.CREATED);
   }
 
-  @Operation(summary = "Redirects the requester to the corresponding long URL for the given short URL ID")
+  @Operation(summary = "Redirects the requester to the corresponding target URL for the given short URL ID")
   @ApiResponses(
       value = {
           @ApiResponse(
               responseCode = "302",
-              description = "Successfully found the long URL that corresponds to the given short URL ID"),
+              description = "Successfully found the target URL that corresponds to the given short "
+                  + "URL ID and set the target URL as the Location header value in the response"),
           @ApiResponse(
               responseCode = "400",
               description = "Invalid request",
@@ -88,14 +83,13 @@ public class UrlShortenerController {
                   schema = @Schema(implementation = ErrorResponse.class)))
       })
   @GetMapping("/short-urls/{shortUrlId}")
-  public ResponseEntity<Void> redirectToLongUrl(@PathVariable Integer shortUrlId) {
-    log.info("Received request to find and redirect the requester to the long URL that corresponds"
-        + "to the short URL with ID {}", shortUrlId);
-    String longUrl = urlShortenerService.findByLongUrlByShortUrlId(shortUrlId);
-    log.info("Successfully found the corresponding long URL {} for short url with id {}", longUrl,
-        shortUrlId);
-    return ResponseEntity.status(HttpStatus.FOUND)
-        .location(URI.create(longUrl))
-        .build();
+  public void redirectToTargetUrl(@PathVariable Integer shortUrlId,
+      HttpServletResponse httpServletResponse) {
+    log.info("Received request to find and redirect the requester to the target URL that "
+        + "corresponds to the short URL with ID {}", shortUrlId);
+    String targetUrl = urlShortenerService.findByTargetUrlByShortUrlId(shortUrlId);
+    log.info("Successfully found short url with id {} with target URL: {}", shortUrlId, targetUrl);
+    httpServletResponse.setHeader(HttpHeaders.LOCATION, targetUrl);
+    httpServletResponse.setStatus(HttpServletResponse.SC_FOUND);
   }
 }
