@@ -64,7 +64,7 @@ public class UrlShortenerController {
   @ApiResponses(
       value = {
           @ApiResponse(
-              responseCode = "302",
+              responseCode = "301",
               description = "Successfully found the target URL that corresponds to the given short "
                   + "URL ID and set the target URL as the Location header value in the response"),
           @ApiResponse(
