@@ -12,7 +12,7 @@ public final class ExceptionHandlerUtility {
   private ExceptionHandlerUtility() {
   }
 
-  public static ResponseEntity<Object> createErrorResponseEntity(HttpStatus httpStatus,
+  public static ResponseEntity<ErrorResponse> createErrorResponseEntity(HttpStatus httpStatus,
       Exception ex) {
     log.error(ExceptionUtils.getStackTrace(ex));
     ErrorResponse errorResponse = new ErrorResponse(httpStatus, ex);
