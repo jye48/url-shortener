@@ -12,9 +12,7 @@ public class ShortUrlDto {
 
   private Integer id;
 
-  private String longUrl;
-
-  private Long millisSinceCreation;
+  private String targetUrl;
 
   private Instant createdTimestamp;
 }
