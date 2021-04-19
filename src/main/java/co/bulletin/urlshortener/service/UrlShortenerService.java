@@ -4,11 +4,16 @@ import co.bulletin.urlshortener.entity.Url;
 import co.bulletin.urlshortener.exception.model.UrlNotFoundException;
 import co.bulletin.urlshortener.mapper.ShortUrlMapper;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
+import co.bulletin.urlshortener.model.GetShortUrlsResponse;
 import co.bulletin.urlshortener.model.UrlDto;
 import co.bulletin.urlshortener.repository.ShortUrlRepository;
 import co.bulletin.urlshortener.utility.EncodingUtility;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,7 +35,7 @@ public class UrlShortenerService {
       Url newUrl = shortUrlMapper.mapCreateShortUrlRequestToEntity(createShortUrlRequest);
       url = shortUrlRepository.save(newUrl);
     }
-    return createShortUrlDtoFromEntity(url);
+    return createUrlDtoFromEntity(url);
   }
 
   public String findTargetUrlByShortUrl(String shortUrl) {
@@ -40,7 +45,15 @@ public class UrlShortenerService {
     return retrievedUrl.getTargetUrl();
   }
 
-  private UrlDto createShortUrlDtoFromEntity(Url url) {
+  public GetShortUrlsResponse getUrls(Pageable pageable) {
+    Page<Url> urlPage = shortUrlRepository.findAll(pageable);
+    List<UrlDto> urlDtos = urlPage.getContent().stream()
+        .map(this::createUrlDtoFromEntity)
+        .collect(Collectors.toList());
+    return new GetShortUrlsResponse(urlDtos, urlPage.getTotalElements(), urlPage.getTotalPages());
+  }
+
+  private UrlDto createUrlDtoFromEntity(Url url) {
     UrlDto urlDto = shortUrlMapper.mapShortUrlEntityToDto(url);
     String shortUrl = EncodingUtility.convertIdToShortUrl(url.getId());
     urlDto.setShortUrl(shortUrl);
