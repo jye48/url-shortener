@@ -7,6 +7,7 @@ import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.Data;
@@ -14,10 +15,10 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "short_url")
+@Table(name = "short_url", indexes = @Index(columnList = "target_url"))
 @EntityListeners(AuditingEntityListener.class)
 @Data
-public class ShortUrl {
+public class Url {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
