@@ -2,7 +2,7 @@ package co.bulletin.urlshortener.controller;
 
 import co.bulletin.urlshortener.exception.model.ErrorResponse;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
-import co.bulletin.urlshortener.model.ShortUrlDto;
+import co.bulletin.urlshortener.model.UrlDto;
 import co.bulletin.urlshortener.service.UrlShortenerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,11 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import javax.servlet.http.HttpServletResponse;
+import java.net.URI;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,7 +41,7 @@ public class UrlShortenerController {
               content =
               @Content(
                   mediaType = "application/json",
-                  schema = @Schema(implementation = ShortUrlDto.class))),
+                  schema = @Schema(implementation = UrlDto.class))),
           @ApiResponse(
               responseCode = "400",
               description = "Invalid request",
@@ -52,12 +51,12 @@ public class UrlShortenerController {
                   schema = @Schema(implementation = ErrorResponse.class)))
       })
   @PostMapping("/short-urls")
-  public ResponseEntity<ShortUrlDto> createShortUrl(
+  public ResponseEntity<UrlDto> createShortUrl(
       @Valid @RequestBody CreateShortUrlRequest createShortUrlRequest) {
     log.info("Received request to create a short url: {}", createShortUrlRequest);
-    ShortUrlDto shortUrlDto = urlShortenerService.createShortUrl(createShortUrlRequest);
-    log.info("Successfully created a new short url: {}", shortUrlDto);
-    return new ResponseEntity<>(shortUrlDto, HttpStatus.CREATED);
+    UrlDto urlDto = urlShortenerService.createShortUrl(createShortUrlRequest);
+    log.info("Successfully created a new short url: {}", urlDto);
+    return new ResponseEntity<>(urlDto, HttpStatus.CREATED);
   }
 
   @Operation(summary = "Redirects the requester to the corresponding target URL for the given short URL ID")
@@ -82,14 +81,14 @@ public class UrlShortenerController {
                   mediaType = "application/json",
                   schema = @Schema(implementation = ErrorResponse.class)))
       })
-  @GetMapping("/short-urls/{shortUrlId}")
-  public void redirectToTargetUrl(@PathVariable Integer shortUrlId,
-      HttpServletResponse httpServletResponse) {
+  @GetMapping("/short-urls/{shortUrl}")
+  public ResponseEntity<Void> redirectToTargetUrl(@PathVariable String shortUrl) {
     log.info("Received request to find and redirect the requester to the target URL that "
-        + "corresponds to the short URL with ID {}", shortUrlId);
-    String targetUrl = urlShortenerService.findByTargetUrlByShortUrlId(shortUrlId);
-    log.info("Successfully found short url with id {} with target URL: {}", shortUrlId, targetUrl);
-    httpServletResponse.setHeader(HttpHeaders.LOCATION, targetUrl);
-    httpServletResponse.setStatus(HttpServletResponse.SC_FOUND);
+        + "corresponds to the short URL with ID {}", shortUrl);
+    String targetUrl = urlShortenerService.findTargetUrlByShortUrl(shortUrl);
+    log.info("Successfully found short url with id {} with target URL: {}", shortUrl, targetUrl);
+    return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
+        .location(URI.create(targetUrl))
+        .build();
   }
 }
