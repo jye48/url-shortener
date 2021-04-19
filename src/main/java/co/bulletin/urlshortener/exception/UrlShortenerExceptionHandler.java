@@ -5,6 +5,7 @@ import co.bulletin.urlshortener.exception.model.ErrorResponse;
 import co.bulletin.urlshortener.exception.model.UrlNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -44,5 +45,11 @@ public class UrlShortenerExceptionHandler {
   @ExceptionHandler(UrlNotFoundException.class)
   public ResponseEntity<ErrorResponse> handleUrlNotFoundException(UrlNotFoundException ex) {
     return ExceptionHandlerUtility.createErrorResponseEntity(HttpStatus.NOT_FOUND, ex);
+  }
+
+  @ExceptionHandler(PropertyReferenceException.class)
+  public ResponseEntity<ErrorResponse> handlePropertyReferenceException(
+      PropertyReferenceException ex) {
+    return ExceptionHandlerUtility.createErrorResponseEntity(HttpStatus.BAD_REQUEST, ex);
   }
 }
