@@ -1,8 +1,8 @@
 package co.bulletin.urlshortener.mapper;
 
-import co.bulletin.urlshortener.entity.ShortUrl;
+import co.bulletin.urlshortener.entity.Url;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
-import co.bulletin.urlshortener.model.ShortUrlDto;
+import co.bulletin.urlshortener.model.UrlDto;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -13,11 +13,11 @@ public class ShortUrlMapper {
 
   private final ModelMapper modelMapper;
 
-  public ShortUrl mapCreateShortUrlRequestToEntity(CreateShortUrlRequest createShortUrlRequest) {
-    return modelMapper.map(createShortUrlRequest, ShortUrl.class);
+  public Url mapCreateShortUrlRequestToEntity(CreateShortUrlRequest createShortUrlRequest) {
+    return modelMapper.map(createShortUrlRequest, Url.class);
   }
 
-  public ShortUrlDto mapShortUrlEntityToDto(ShortUrl shortUrl) {
-    return modelMapper.map(shortUrl, ShortUrlDto.class);
+  public UrlDto mapShortUrlEntityToDto(Url url) {
+    return modelMapper.map(url, UrlDto.class);
   }
 }
