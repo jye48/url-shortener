@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UrlDto {
+public class ShortUrlDto {
 
-  private String shortUrl;
+  private String shortUrlId;
 
   private String targetUrl;
 

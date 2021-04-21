@@ -1,10 +1,10 @@
 package co.bulletin.urlshortener.repository;
 
-import co.bulletin.urlshortener.entity.Url;
+import co.bulletin.urlshortener.entity.ShortUrl;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ShortUrlRepository extends JpaRepository<Url, Integer> {
+public interface ShortUrlRepository extends JpaRepository<ShortUrl, Integer> {
 
-  Optional<Url> findByTargetUrl(String targetUrl);
+  Optional<ShortUrl> findByTargetUrl(String targetUrl);
 }
