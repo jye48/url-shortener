@@ -19,7 +19,7 @@ Linux or Mac in a README file.
 
 Constraints and Specifications
  - Max submitted URL length of 2048 chars
- - No constraint on shortened URL char set
+ - No constraint on shortened URL char set but ideally should be alphanumeric
  - Shortened url should be less than 7 chars long
  - List of short urls should contain "target url" , "short url" , "time created"
  - Time created can be epoch time (aka unix timestamp)
