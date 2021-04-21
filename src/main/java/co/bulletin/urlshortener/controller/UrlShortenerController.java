@@ -4,6 +4,7 @@ import co.bulletin.urlshortener.exception.model.ErrorResponse;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
 import co.bulletin.urlshortener.model.GetShortUrlsResponse;
 import co.bulletin.urlshortener.model.ShortUrlDto;
+import co.bulletin.urlshortener.model.ShortUrlDtoWrapper;
 import co.bulletin.urlshortener.service.UrlShortenerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -64,9 +65,18 @@ public class UrlShortenerController {
   public ResponseEntity<ShortUrlDto> createShortUrl(
       @Valid @RequestBody CreateShortUrlRequest createShortUrlRequest) {
     log.info("Received request to create a short url: {}", createShortUrlRequest);
-    ShortUrlDto shortUrlDto = urlShortenerService.createShortUrl(createShortUrlRequest);
-    log.info("Successfully created a new short url: {}", shortUrlDto);
-    return new ResponseEntity<>(shortUrlDto, HttpStatus.CREATED);
+
+    ShortUrlDtoWrapper shortUrlDtoWrapper = urlShortenerService
+        .createShortUrl(createShortUrlRequest);
+    ShortUrlDto shortUrlDto = shortUrlDtoWrapper.getShortUrlDto();
+    boolean isNew = shortUrlDtoWrapper.isNewShortUrl();
+
+    if (isNew) {
+      log.info("Successfully created a new short url: {}", shortUrlDto);
+      return new ResponseEntity<>(shortUrlDto, HttpStatus.CREATED);
+    }
+    log.info("Successfully retrieved existing short url: {}", shortUrlDto);
+    return new ResponseEntity<>(shortUrlDto, HttpStatus.OK);
   }
 
   @Operation(summary = "This route WILL NOT redirect to the target URL if called through Swagger "
