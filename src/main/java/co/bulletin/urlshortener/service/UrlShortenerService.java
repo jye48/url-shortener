@@ -1,11 +1,11 @@
 package co.bulletin.urlshortener.service;
 
-import co.bulletin.urlshortener.entity.Url;
+import co.bulletin.urlshortener.entity.ShortUrl;
 import co.bulletin.urlshortener.exception.model.UrlNotFoundException;
 import co.bulletin.urlshortener.mapper.ShortUrlMapper;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
 import co.bulletin.urlshortener.model.GetShortUrlsResponse;
-import co.bulletin.urlshortener.model.UrlDto;
+import co.bulletin.urlshortener.model.ShortUrlDto;
 import co.bulletin.urlshortener.repository.ShortUrlRepository;
 import co.bulletin.urlshortener.utility.EncodingUtility;
 import java.util.List;
@@ -24,39 +24,47 @@ public class UrlShortenerService {
 
   private final ShortUrlMapper shortUrlMapper;
 
-  public UrlDto createShortUrl(CreateShortUrlRequest createShortUrlRequest) {
+  public ShortUrlDto createShortUrl(CreateShortUrlRequest createShortUrlRequest) {
     String targetUrl = createShortUrlRequest.getTargetUrl();
-    Optional<Url> existingShortUrlOptional = shortUrlRepository.findByTargetUrl(targetUrl);
-    Url url;
+    Optional<ShortUrl> existingShortUrlOptional = shortUrlRepository.findByTargetUrl(targetUrl);
+    ShortUrl shortUrl;
 
     if (existingShortUrlOptional.isPresent()) {
-      url = existingShortUrlOptional.get();
+      shortUrl = existingShortUrlOptional.get();
     } else {
-      Url newUrl = shortUrlMapper.mapCreateShortUrlRequestToEntity(createShortUrlRequest);
-      url = shortUrlRepository.save(newUrl);
+      ShortUrl newShortUrl = shortUrlMapper.mapCreateShortUrlRequestToEntity(createShortUrlRequest);
+      shortUrl = shortUrlRepository.save(newShortUrl);
     }
-    return createUrlDtoFromEntity(url);
+
+    return createShortUrlDtoFromEntity(shortUrl);
   }
 
-  public String findTargetUrlByShortUrl(String shortUrl) {
-    int shortUrlId = EncodingUtility.shortUrlToId(shortUrl);
-    Url retrievedUrl = shortUrlRepository.findById(shortUrlId)
-        .orElseThrow(() -> new UrlNotFoundException(shortUrl));
-    return retrievedUrl.getTargetUrl();
+  public String findTargetUrlByShortUrlId(String shortUrlId) {
+    int shortUrlEntityId = EncodingUtility.base62Decode(shortUrlId);
+
+    ShortUrl retrievedShortUrl = shortUrlRepository.findById(shortUrlEntityId)
+        .orElseThrow(() -> new UrlNotFoundException(shortUrlId));
+
+    return retrievedShortUrl.getTargetUrl();
   }
 
-  public GetShortUrlsResponse getUrls(Pageable pageable) {
-    Page<Url> urlPage = shortUrlRepository.findAll(pageable);
-    List<UrlDto> urlDtos = urlPage.getContent().stream()
-        .map(this::createUrlDtoFromEntity)
+  public GetShortUrlsResponse getShortUrls(Pageable pageable) {
+    Page<ShortUrl> shortUrlPage = shortUrlRepository.findAll(pageable);
+
+    List<ShortUrlDto> shortUrlDtos = shortUrlPage.getContent().stream()
+        .map(this::createShortUrlDtoFromEntity)
         .collect(Collectors.toList());
-    return new GetShortUrlsResponse(urlDtos, urlPage.getTotalElements(), urlPage.getTotalPages());
+
+    return new GetShortUrlsResponse(shortUrlDtos, shortUrlPage.getTotalElements(),
+        shortUrlPage.getTotalPages());
   }
 
-  private UrlDto createUrlDtoFromEntity(Url url) {
-    UrlDto urlDto = shortUrlMapper.mapShortUrlEntityToDto(url);
-    String shortUrl = EncodingUtility.convertIdToShortUrl(url.getId());
-    urlDto.setShortUrl(shortUrl);
-    return urlDto;
+  private ShortUrlDto createShortUrlDtoFromEntity(ShortUrl shortUrl) {
+    ShortUrlDto shortUrlDto = shortUrlMapper.mapShortUrlEntityToDto(shortUrl);
+
+    String shortUrlId = EncodingUtility.base62Encode(shortUrl.getId());
+    shortUrlDto.setShortUrlId(shortUrlId);
+
+    return shortUrlDto;
   }
 }
