@@ -18,7 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(name = "short_url", indexes = @Index(columnList = "target_url"))
 @EntityListeners(AuditingEntityListener.class)
 @Data
-public class Url {
+public class ShortUrl {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
