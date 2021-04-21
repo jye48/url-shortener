@@ -9,7 +9,7 @@ public final class EncodingUtility {
   private EncodingUtility() {
   }
 
-  public static String convertIdToShortUrl(int id) {
+  public static String base62Encode(int id) {
     StringBuilder shortUrlBuilder = new StringBuilder();
 
     while (id > 0) {
@@ -20,7 +20,7 @@ public final class EncodingUtility {
     return shortUrlBuilder.reverse().toString();
   }
 
-  public static int shortUrlToId(String shortUrl) {
+  public static int base62Decode(String shortUrl) {
     int id = 0;
 
     for (char c : shortUrl.toCharArray()) {
@@ -32,6 +32,7 @@ public final class EncodingUtility {
         id = id * 62 + c - '0' + 52;
       }
     }
+
     return id;
   }
 }
