@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GetShortUrlsResponse {
 
-  private List<ShortUrlDto> urls;
+  private List<ShortUrlDto> shortUrls;
 
   private Long totalElementCount;
 
