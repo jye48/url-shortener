@@ -6,6 +6,7 @@ import co.bulletin.urlshortener.mapper.ShortUrlMapper;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
 import co.bulletin.urlshortener.model.GetShortUrlsResponse;
 import co.bulletin.urlshortener.model.ShortUrlDto;
+import co.bulletin.urlshortener.model.ShortUrlDtoWrapper;
 import co.bulletin.urlshortener.repository.ShortUrlRepository;
 import co.bulletin.urlshortener.utility.EncodingUtility;
 import java.util.List;
@@ -24,19 +25,23 @@ public class UrlShortenerService {
 
   private final ShortUrlMapper shortUrlMapper;
 
-  public ShortUrlDto createShortUrl(CreateShortUrlRequest createShortUrlRequest) {
+  public ShortUrlDtoWrapper createShortUrl(CreateShortUrlRequest createShortUrlRequest) {
     String targetUrl = createShortUrlRequest.getTargetUrl();
     Optional<ShortUrl> existingShortUrlOptional = shortUrlRepository.findByTargetUrl(targetUrl);
     ShortUrl shortUrl;
+    boolean isNewShortUrl = false;
 
     if (existingShortUrlOptional.isPresent()) {
       shortUrl = existingShortUrlOptional.get();
     } else {
       ShortUrl newShortUrl = shortUrlMapper.mapCreateShortUrlRequestToEntity(createShortUrlRequest);
       shortUrl = shortUrlRepository.save(newShortUrl);
+      isNewShortUrl = true;
     }
 
-    return createShortUrlDtoFromEntity(shortUrl);
+    ShortUrlDto shortUrlDto = createShortUrlDtoFromEntity(shortUrl);
+
+    return new ShortUrlDtoWrapper(shortUrlDto, isNewShortUrl);
   }
 
   public String findTargetUrlByShortUrlId(String shortUrlId) {
