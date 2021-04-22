@@ -57,6 +57,36 @@ It is recommended to view the OpenAPI documentation in Swagger UI for this API i
 more details about 3 routes ,such as request and response bodies. Swagger UI also makes it easy and
 convenient to send requests to the API.
 
+## URL Shortener Database Design
+
+- The short URL entity primary key data type is an int, this can easily be switched to a bigint if a
+  larger range of entity IDs are required.
+- The auto increment method is used to generate the primary key for the short URL entities stored in
+  the database.
+- A secondary index is created on the target_url column to speed up target URL lookups. Target URL
+  lookups are used to check if a short URL already exists when receiving a request to create a new
+  short URL.
+
+### URL Shortener Database Design Trade-Offs
+
+- Choosing to generate the primary key using auto increment can impact the concurrency and
+  scalability of the application since due to the auto increment locks required to ensure unique
+  keys.
+- Auto increment may not reliably produce unique keys in a sharded database.
+- Auto incremented keys makes primary key enumeration very easy, which may be a security risk.
+
+## URL Shortener API Design
+
+- To generate the short URL ID that gets returned to the user, the short URL entity ID is encoded to
+  a Base62 string. To find the corresponding short URL entity when given a Base62 encoded short URL
+  ID, the ID is Base62 decoded to an int, which is used to find the corresponding short URL entity
+  in the database.
+- The Base62 encoded short URL ID is not stored in the database because then 2 database queries, a
+  save and update, would be required for new short URLs. This is because the short URL would have to
+  be saved first in order to get its entity ID (due to auto-incrementing), then the Base62 encoded
+  ID would need to calculated, and the new short URL entity would need to be updated to store its
+  corresponding Base62 encoded ID.
+
 ## Project Code Standards
 
 - This code style for this project mostly follows
