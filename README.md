@@ -11,13 +11,13 @@ project and dependency management.
 
 ### How To Run This Project in IntelliJ (Recommended)
 
-2. Open IntelliJ and open the cloned repository in Intellij.
+2. Open IntelliJ and open the root directory of the cloned repository in Intellij.
 3. Wait for IntelliJ to finish indexing the project.
 4. IntelliJ should be able to automatically tell that this project is a Spring Boot project and
-   create a run configuration automatically. In should also be able to tell that the project uses
-   Maven and auto-import the dependencies. If IntelliJ does not auto-import the dependencies, there
-   may be a small icon on the right side of the editor that you wil need to click to import the
-   dependencies.
+   create a run configuration automatically. It should also auto-import the dependencies after
+   recognizing that the project uses Maven. If IntelliJ does not auto-import the dependencies, there
+   may be a small Maven icon on the right side of the editor that you wil need to click to import
+   the dependencies.
 5. To run the project in IntelliJ, you can either press `ctrl + R` on your keyboard, or you can
    click the small green play icon in near the top right of the Intellij window
 
@@ -33,31 +33,48 @@ project and dependency management.
 This API has 3 routes, and the routes below assume you are running this API locally on the default
 port 8080. To view the OpenAPI documentation in Swagger UI, run this API locally on port 8080 and
 click [here](http://localhost:8080/api/swagger-ui/index.html?configUrl=%2Fapi%2Fv3%2Fapi-docs%2Fswagger-config)
-.
+. It is recommended to view the OpenAPI documentation in Swagger UI for this API if you want to find
+more details about the 3 routes, such as request and response bodies. Swagger UI also makes it easy
+and convenient to send requests to the API and receive responses.
 
 #### GET http://localhost:8080/api/short-urls
 
 This route will return a paged list of all existing short URLs currently stored in the H2 in-memory
 database. This route allows the requester to set the page number, page size, and sort by fields as
 query parameters. More details about this can be found in the Swagger UI.
+Ex: `http://localhost:8080/api/short-urls?page=1&size=5&sort=targetUrl,desc` will retrieve page 1 of
+size 5 of the short URLs sorted by targetUrl in descending order, along with the total short URL
+count and total page count corresponding to the size query parameter. The default value for the page
+query parameter is 0, and the default value for the size query parameter is 20. If a sort query
+parameter is specified, the default sort order is ascending, and multiple sort criteria are
+supported.
 
 #### GET http://localhost:8080/api/short-urls/{shortUrlId}
 
 This route will redirect the requester to the target URL that corresponds to the short URL ID path
-variable. It is important to note that this route WILL NOT redirect if called through Swagger UI,
-and should ideally be entered into a browser's address bar directly in order for redirecting to
-work.
+variable. This route accomplishes the redirect by setting the HTTP status of the response to 301,
+and setting the `Location` header value in the response to the target URL. It is important to note
+that this route **WILL NOT** redirect if called through Swagger UI, and should ideally be entered
+into a browser's address bar directly in order for redirecting to work. Ex:
+Entering `http://localhost:8080/api/short-urls/b` in a browser address bar will redirect the
+requester to the target URL that corresponds to the short URL with ID `b`.
 
 #### POST http://localhost:8080/api/short-urls
 
 This route will either create a new short URL for the given target URL, or it will return the
-existing short URL for the given target URL if it already exists.
+existing short URL for the given target URL if it already exists. The API does perform validation on
+the targetUrl field in the request body. The targetUrl must not be blank, and must be a valid full
+URL with a length <= 2048 characters. Example request body:
 
-It is recommended to view the OpenAPI documentation in Swagger UI for this API if you want to find
-more details about 3 routes ,such as request and response bodies. Swagger UI also makes it easy and
-convenient to send requests to the API.
+```
+{
+  "targetUrl": "https://www.bulletin.co"
+}
+```
 
-## URL Shortener Database Design
+## URL Shortener Design and Analysis
+
+### URL Shortener Database Design and Analysis
 
 - The short URL entity primary key data type is an int, this can easily be switched to a bigint if a
   larger range of entity IDs are required.
@@ -67,25 +84,54 @@ convenient to send requests to the API.
   lookups are used to check if a short URL already exists when receiving a request to create a new
   short URL.
 
-### URL Shortener Database Design Trade-Offs
+### URL Shortener Database Design Trade-Offs and Alternatives
 
+#### Trade-Offs and Alternatives to Auto Incremented Primary Keys
+
+- Generating the primary key via auto increment is very easy and fast to implement.
 - Choosing to generate the primary key using auto increment can impact the concurrency and
-  scalability of the application since due to the auto increment locks required to ensure unique
-  keys.
+  scalability of the application due to the auto increment locks required to ensure unique primary
+  key generation.
 - Auto increment may not reliably produce unique keys in a sharded database.
 - Auto incremented keys makes primary key enumeration very easy, which may be a security risk.
+- Some alternatives to generating primary keys via auto increment include using UUIDs as the primary
+  key, or to generate keys using
+  the [Snowflake algorithm](https://en.wikipedia.org/wiki/Snowflake_ID).
 
-## URL Shortener API Design
+#### Trade-Offs and Alternatives to Spring Data JPA
+
+- Spring Data JPA makes it very easy and convenient to interface with a database using application
+  code.
+- Because Spring Data JPA adds extra layers of abstraction over the database queries, performance
+  may reduced as a result.
+- Alternatives include Spring Data JDBC and Spring JDBC, both of which offer fewer features but
+  better performance.
+
+### URL Shortener API Design and Analysis
 
 - To generate the short URL ID that gets returned to the user, the short URL entity ID is encoded to
   a Base62 string. To find the corresponding short URL entity when given a Base62 encoded short URL
-  ID, the ID is Base62 decoded to an int, which is used to find the corresponding short URL entity
-  in the database.
+  ID, the ID is Base62 decoded to the short URL's int primary key, which is used to find the
+  corresponding short URL entity in the database.
 - The Base62 encoded short URL ID is not stored in the database because then 2 database queries, a
   save and update, would be required for new short URLs. This is because the short URL would have to
   be saved first in order to get its entity ID (due to auto-incrementing), then the Base62 encoded
   ID would need to calculated, and the new short URL entity would need to be updated to store its
-  corresponding Base62 encoded ID.
+  corresponding Base62 encoded ID. One way to avoid this is to generate the primary key in the
+  application code using one of the methods described in
+  the `Trade-Offs and Alternatives to Auto Incremented Primary Keys` section.
+- For the short URL redirect route `GET http://localhost:8080/api/short-urls/{shortUrlId}`, an HTTP
+  status of 301 is returned to match the behavior of [TinyURL](https://tinyurl.com/app)
+  and [Bitly](https://bitly.com/). One advantage of returning a 301 HTTP status is that browsers
+  will usually cache the short URL to target URL redirect, sometimes indefinitely, which will reduce
+  the response times of subsequent redirects and reduce the number of requests sent to the URL
+  shortener service. ***NOTE***: Because browsers will cache the redirects, unexpected redirect
+  behavior may happen if you create some short urls and redirect to their target URLs, then restart
+  the service and perform the previous actions again. This is because an in-memory database is
+  currently used, so if you restart the service then the database is cleared, and creating more
+  short URLs may cause overlap with previously created short URLs whose redirects have been cached
+  by the browser. To avoid this scenario, if an application restart occurs then you can either clear
+  the browser cache or open a private browser window to avoid using previously cached redirects.
 
 ## Project Code Standards
 
@@ -93,7 +139,7 @@ convenient to send requests to the API.
   the [Google Java Style Guide](https://google.github.io/styleguide/javaguide.html). For criteria
   not explicitly listed in the guide, I used my best judgement to style to code to make it as
   readable as I could, ex: adding empty lines to separate code blocks into logical units of work.
-- This project also uses code suggestions from [SonarLint](https://www.sonarlint.org/).
+- This project also used code suggestions from [SonarLint](https://www.sonarlint.org/).
 
 ## Major Dependencies Used in This Project
 
