@@ -118,7 +118,7 @@ public class UrlShortenerController {
       value = {
           @ApiResponse(
               responseCode = "200",
-              description = "Successfully retrieved existing short URLs",
+              description = "Successfully retrieved page of existing short URLs",
               content =
               @Content(
                   mediaType = "application/json",
