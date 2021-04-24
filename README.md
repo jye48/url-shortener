@@ -2,8 +2,8 @@
 
 This RESTful API allows users to create short URLs for target URLs, redirect to the corresponding
 target URL for a short URL, and retrieve a paged list of existing short URLs. This service is
-written in Java 11 using the Spring Boot framework, uses H2 as an in-memory database, and Maven for
-project and dependency management.
+written in Java 11 using the Spring Boot framework, uses H2 as an in-memory database, and uses Maven
+for project and dependency management.
 
 ## How to Run This API Locally
 
@@ -19,7 +19,7 @@ project and dependency management.
    click the UrlShortenerApplication.class file and click `Run 'UrlShortenerApplication'`.
 5. If IntelliJ automatically created a run configuration, or if you created it manually, you can
    either press `ctrl + R` on your keyboard to run the application, or you can click the small green
-   play icon in near the top right of the IntelliJ window
+   play icon near the top right of the IntelliJ window
 
 ### How to Run This Project in the Terminal
 
