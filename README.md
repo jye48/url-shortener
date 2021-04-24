@@ -117,18 +117,21 @@ URL with a length <= 2048 characters. Example request body:
   find the corresponding short URL entity in the database.
 - The Base62 encoded short URL ID is not stored in the database because then 2 database queries, a
   save and update, would be required for new short URLs. This is because the short URL would have to
-  be saved first in order to get its entity ID due to auto-increment primary key generation, then
-  the Base62 encoded ID would need to calculated, and the new short URL entity would need to be
-  updated to store its corresponding Base62 encoded ID. One way to avoid this is to generate the
-  primary key in the application code using one of the methods described in
-  the `Trade-Offs and Alternatives to Auto Incremented Primary Keys` section. This way the short URL
-  ID can be determine without having to first save the short URL entity in the database.
+  be saved first in order to get its primary key due to auto-increment primary key generation, then
+  the Base62 encoded ID would need to be calculated, and the new short URL entity would need to be
+  updated to store its corresponding Base62 encoded ID. Because the Base62 encoding and decoding are
+  in-memory operations, they are faster than having to make another database update query to set the
+  short URL ID. One way to save a new short URL ID in the database in the initial save query is to
+  generate the primary key in the application code using one of the methods described in
+  the `Trade-Offs and Alternatives to Auto Incremented Primary Keys`
+  section. This way the short URL ID can be determined without first having to save the short URL
+  entity in the database.
 - For the short URL redirect route `GET http://localhost:8080/api/short-urls/{shortUrlId}`, an HTTP
   status of 301 is returned to match the behavior of [TinyURL](https://tinyurl.com/app)
   and [Bitly](https://bitly.com/). One advantage of returning a 301 HTTP status is that browsers
   will usually cache the short URL to target URL redirect, sometimes indefinitely, which will reduce
-  the response times of subsequent redirects and reduce the number of requests sent to the URL
-  shortener service. ***NOTE***: Because browsers will cache the redirects, unexpected redirect
+  the response times of subsequent redirects and reduce the number of redirect requests sent to the
+  URL shortener service. ***NOTE***: Because browsers will cache the redirects, unexpected redirect
   behavior may happen if you create some short urls and redirect to their target URLs, then restart
   the service and perform the previous actions again. This is because an in-memory database is
   currently used, so if you restart the service then the database is cleared, and creating more
