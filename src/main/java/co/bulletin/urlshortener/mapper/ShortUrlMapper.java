@@ -3,6 +3,7 @@ package co.bulletin.urlshortener.mapper;
 import co.bulletin.urlshortener.entity.ShortUrl;
 import co.bulletin.urlshortener.model.CreateShortUrlRequest;
 import co.bulletin.urlshortener.model.ShortUrlDto;
+import co.bulletin.urlshortener.utility.EncodingUtility;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,11 @@ public class ShortUrlMapper {
   }
 
   public ShortUrlDto mapShortUrlEntityToDto(ShortUrl shortUrl) {
-    return modelMapper.map(shortUrl, ShortUrlDto.class);
+    ShortUrlDto shortUrlDto = modelMapper.map(shortUrl, ShortUrlDto.class);
+
+    String shortUrlId = EncodingUtility.base62Encode(shortUrl.getId());
+    shortUrlDto.setShortUrlId(shortUrlId);
+
+    return shortUrlDto;
   }
 }

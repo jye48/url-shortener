@@ -3,6 +3,7 @@ package co.bulletin.urlshortener.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
 
 @Data
 @NoArgsConstructor
@@ -11,5 +12,5 @@ public class ShortUrlDtoWrapper {
 
   private ShortUrlDto shortUrlDto;
 
-  private boolean isNewShortUrl;
+  private HttpStatus httpStatus;
 }

@@ -5,7 +5,8 @@ import co.bulletin.urlshortener.model.CreateShortUrlRequest;
 import co.bulletin.urlshortener.model.GetShortUrlsResponse;
 import co.bulletin.urlshortener.model.ShortUrlDto;
 import co.bulletin.urlshortener.model.ShortUrlDtoWrapper;
-import co.bulletin.urlshortener.service.UrlShortenerService;
+import co.bulletin.urlshortener.service.ShortUrlCreationService;
+import co.bulletin.urlshortener.service.ShortUrlRetrievalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +16,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.net.URI;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springdoc.api.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -32,11 +32,12 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(
     name = "Url Shortener Controller",
     description = "Contains endpoints to create and retrieve shortened URLs")
-@Slf4j
 @RequiredArgsConstructor
 public class UrlShortenerController {
 
-  private final UrlShortenerService urlShortenerService;
+  private final ShortUrlCreationService shortUrlCreationService;
+
+  private final ShortUrlRetrievalService shortUrlRetrievalService;
 
   @Operation(summary = "Create a new short URL for a given target URL")
   @ApiResponses(
@@ -66,19 +67,11 @@ public class UrlShortenerController {
   @PostMapping
   public ResponseEntity<ShortUrlDto> createShortUrl(
       @Valid @RequestBody CreateShortUrlRequest createShortUrlRequest) {
-    log.info("Received request to create a short url: {}", createShortUrlRequest);
 
-    ShortUrlDtoWrapper shortUrlDtoWrapper = urlShortenerService
+    ShortUrlDtoWrapper shortUrlDtoWrapper = shortUrlCreationService
         .createShortUrl(createShortUrlRequest);
-    ShortUrlDto shortUrlDto = shortUrlDtoWrapper.getShortUrlDto();
-    boolean isNew = shortUrlDtoWrapper.isNewShortUrl();
-
-    if (isNew) {
-      log.info("Successfully created a new short url: {}", shortUrlDto);
-      return new ResponseEntity<>(shortUrlDto, HttpStatus.CREATED);
-    }
-    log.info("Successfully retrieved existing short url: {}", shortUrlDto);
-    return new ResponseEntity<>(shortUrlDto, HttpStatus.OK);
+    return new ResponseEntity<>(shortUrlDtoWrapper.getShortUrlDto(),
+        shortUrlDtoWrapper.getHttpStatus());
   }
 
   @Operation(summary = "This route WILL NOT redirect to the target URL if called through Swagger "
@@ -106,10 +99,7 @@ public class UrlShortenerController {
       })
   @GetMapping("/{shortUrlId}")
   public ResponseEntity<Void> redirectToTargetUrl(@PathVariable String shortUrlId) {
-    log.info("Received request to find and redirect the requester to the target URL that "
-        + "corresponds to the short URL with ID {}", shortUrlId);
-    String targetUrl = urlShortenerService.findTargetUrlByShortUrlId(shortUrlId);
-    log.info("Successfully found short url with id {} with target URL: {}", shortUrlId, targetUrl);
+    String targetUrl = shortUrlRetrievalService.findTargetUrlByShortUrlId(shortUrlId);
     return ResponseEntity.status(HttpStatus.MOVED_PERMANENTLY)
         .location(URI.create(targetUrl))
         .build();
@@ -128,9 +118,6 @@ public class UrlShortenerController {
       })
   @GetMapping
   public GetShortUrlsResponse getExistingShortenedUrls(@ParameterObject Pageable pageable) {
-    log.info("Received request to get existing shortened URLs with pageable {}", pageable);
-    GetShortUrlsResponse getShortUrlsResponse = urlShortenerService.getShortUrls(pageable);
-    log.info("Successfully retrieved existing shortened URLs: {}", getShortUrlsResponse);
-    return getShortUrlsResponse;
+    return shortUrlRetrievalService.getShortUrls(pageable);
   }
 }
