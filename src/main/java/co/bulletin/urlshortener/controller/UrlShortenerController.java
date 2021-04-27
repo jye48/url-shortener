@@ -24,9 +24,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping("/short-urls")
 @Tag(
     name = "Url Shortener Controller",
     description = "Contains endpoints to create and retrieve shortened URLs")
@@ -61,7 +63,7 @@ public class UrlShortenerController {
                   mediaType = "application/json",
                   schema = @Schema(implementation = ErrorResponse.class)))
       })
-  @PostMapping("/short-urls")
+  @PostMapping
   public ResponseEntity<ShortUrlDto> createShortUrl(
       @Valid @RequestBody CreateShortUrlRequest createShortUrlRequest) {
     log.info("Received request to create a short url: {}", createShortUrlRequest);
@@ -102,7 +104,7 @@ public class UrlShortenerController {
                   mediaType = "application/json",
                   schema = @Schema(implementation = ErrorResponse.class)))
       })
-  @GetMapping("/short-urls/{shortUrlId}")
+  @GetMapping("/{shortUrlId}")
   public ResponseEntity<Void> redirectToTargetUrl(@PathVariable String shortUrlId) {
     log.info("Received request to find and redirect the requester to the target URL that "
         + "corresponds to the short URL with ID {}", shortUrlId);
@@ -124,7 +126,7 @@ public class UrlShortenerController {
                   mediaType = "application/json",
                   schema = @Schema(implementation = GetShortUrlsResponse.class)))
       })
-  @GetMapping("/short-urls")
+  @GetMapping
   public GetShortUrlsResponse getExistingShortenedUrls(@ParameterObject Pageable pageable) {
     log.info("Received request to get existing shortened URLs with pageable {}", pageable);
     GetShortUrlsResponse getShortUrlsResponse = urlShortenerService.getShortUrls(pageable);
