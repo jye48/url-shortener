@@ -22,7 +22,7 @@ for project and dependency management.
 
 3. Open IntelliJ and open the root directory of the cloned repository in IntelliJ.
 4. Wait for IntelliJ to finish indexing the project and importing the dependencies.
-5. Make sure you have a JDK selected for the project in IntelliJ, Instructions on how to do this can be found [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).
+5. Make sure you have a JDK selected for this project in IntelliJ. Instructions on how to do this can be found [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).
 6. Navigate to the `src/main/java/co.bulletin.urlshortener` directory, right
    click the UrlShortenerApplication.class file and click `Run 'UrlShortenerApplication'`.
 6. If IntelliJ automatically created a run configuration, or if you created it manually, you can
