@@ -7,28 +7,27 @@ for project and dependency management.
 
 ## How to Run This API Locally
 
-1. Clone this repository
-
-### How to Run This Project in IntelliJ
-
-2. Open IntelliJ and open the root directory of the cloned repository in IntelliJ.
-3. Wait for IntelliJ to finish indexing the project and importing the dependencies.
-4. IntelliJ should be able to automatically tell that this project is a Spring Boot project and
-   create a run configuration automatically. In the case where it doesn't automatically create the
-   run configuration, navigate to the `src/main/java/co.bulletin.urlshortener` directory, right
-   click the UrlShortenerApplication.class file and click `Run 'UrlShortenerApplication'`.
-5. If IntelliJ automatically created a run configuration, or if you created it manually, you can
-   either press `ctrl + R` on your keyboard to run the application, or you can click the small green
-   play icon near the top right of the IntelliJ window
-
-### How to Run This Project in the Terminal
-
+1. Clone this repository.
 2. Make sure you have Java 11 and Maven installed and setup on your machine. Instructions for
    installing Java 11 using Homebrew can be
    found [here](https://medium.com/w-logs/installing-java-11-on-macos-with-homebrew-7f73c1e9fadf).
    Instructions for installing Maven can be found [here](https://maven.apache.org/install.html).
+   
+### How to Run This Project in the Terminal
+
 3. Inside the terminal, navigate to the root directory of this project.
 4. In the root directory of this project inside the terminal, run the command `mvn spring-boot:run`.
+
+### How to Run This Project in IntelliJ
+
+3. Open IntelliJ and open the root directory of the cloned repository in IntelliJ.
+4. Wait for IntelliJ to finish indexing the project and importing the dependencies.
+5. Make sure you have a JDK selected for the project in IntelliJ, Instructions on how to do this can be found [here](https://www.jetbrains.com/help/idea/sdk.html#set-up-jdk).
+6. Navigate to the `src/main/java/co.bulletin.urlshortener` directory, right
+   click the UrlShortenerApplication.class file and click `Run 'UrlShortenerApplication'`.
+6. If IntelliJ automatically created a run configuration, or if you created it manually, you can
+   either press `ctrl + R` on your keyboard to run the application, or you can click the small green
+   play icon near the top right of the IntelliJ window.
 
 ## API Routes (While Running Locally)
 
