@@ -1,4 +1,4 @@
-# Bulletin URL Shortener Service
+# URL Shortener Service
 
 This RESTful API allows users to create short URLs for target URLs, redirect to the corresponding
 target URL for a short URL, and retrieve a paged list of existing short URLs. This service is
